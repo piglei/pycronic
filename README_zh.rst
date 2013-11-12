@@ -2,36 +2,27 @@
 pycronic
 ========
 
-This project is inspired by `cronic`_ and privided some extra useful functions
-such as sending email error report by SMTP and store logs of crontab scripts.
+这个项目受到了 `cronic`_ 的启发，并在原始脚本的基础上增加了一些额外的功能。比如通过自定义的SMTP发送报警邮件、保存所有的cron jobs的运行日志。
 
-Why pycronic?
-=============
+为什么要使用pycronic?
+=====================
 
-Crontab has the ability to send mail notification when any output was generated
-executing your script as we know. And it will send bunch of emails to you 
-every day if your has a lof of scripts, what if we only want to get the mail 
-when something goes wrong?
+我们都知道，crontab拥有自己的邮件通知系统，当你的cron job产生一些输出时，他会发送一封邮件通知到你设置的邮箱地址。但是，当你要运行的cron job特别多时，这些邮件简直会多的看不过来。所以我们需要让它的邮件通知变的更聪明点，只在任务出错的时候通知我们。
 
-As a result, You may config your crontab like this: ::
+所以，你可能会把你的crontab配置成这样： ::
 
-    # Redirect all standard output to /dev/null so we will get an email
-    # only if this script has some standard error output.
+    # 重定向所有的标准输出，这样只有在脚本有错误输出的时候我们才会接到邮件
     * * * * * some_work > /dev/null
 
-    # Or this to ignore all output for lazy people, but you will never 
-    # be notified if your script fails.
+    # 或者你更懒一些关掉了所有的输出，这样你的脚本要是出错了，可能过了几个星期你都不会发现
     * * * * * some_work > /dev/null 2>&1
 
-Using pycronic to make things simpler: ::
+如果使用pycronic，事情将会变得更简单 ::
 
     cronic="/usr/local/bin/cronic"                                                                       
     * * * * * &cronic some_work
 
-All you need is prepend cronic to your script.
-**cronic** command will check the return code and the error output for you, if something
-wents wrong, you will get an email notification through crontab's default mailing system
-or your customized STMP server. ::
+所有你要做的就是用cronic命令放在你脚本前面，它会帮你检查你的脚本的返回值、检查是不是有错误输出，如果有问题的话，它会发邮件通知你。 ::
 
     MAIL TITLE: [Cronic@server1] Error occoured when running "backup"
 
@@ -56,22 +47,22 @@ or your customized STMP server. ::
 
     Starting backup...
 
-And cronic will stores all your scripts output to a directory(/tmp/pycronic by default).
+默认设置下，cronic还会把你的脚本运行结果存储在目录(/tmp/pycronic)中。
 
-Installation
-============
+如何安装
+========
 
-Using pip: ::
+使用pip来安装: ::
 
-    # Install from pypi
+    # pypi
     sudo pip install pycronic
-    # Or install from github
+    # 或者github
     sudo pip install -e git+https://github.com/piglei/pycronic/#egg=pycronic
 
-Configuration
-=============
+配置
+====
 
-After the installation, run "cronic" in your command line to verify: ::
+安装好了以后，运行cronic试试看： ::
 
     $ cronic 
     Usage: cronic YOUR_COMMAND
@@ -80,8 +71,7 @@ After the installation, run "cronic" in your command line to verify: ::
     Config file "/etc/pycronic.conf" does not exist!
     Run "cronic init" to create a default one."
 
-Then run "sudo cronic init" to creat a default config file under /etc, the default config
-file should looked like this: ::
+然后运行 "sudo cronic init" 来创建一个默认的配置文件: ::
 
     # Log path for pycronic, pycronic will store all logs to this directory
     log_path = /tmp/pycronic
@@ -103,17 +93,16 @@ file should looked like this: ::
     # FROM = Cronic <pycronic@sample.com>
     # port = 587
 
-How to use
-==========
+如何使用
+========
 
-cronic will be silent if no error has occured when running a script: ::
+当你运行的命令没有产生错误的时候，cronic不会输出任何东西: ::
 
     piglei@macbook-pro:etc$ cronic ls
     piglei@macbook-pro:etc$ cat /tmp/pycronic/ls.log 
     [The script result will be stored in the log file]
 
-But if an error has occured(cronic will check the standard error output), it will print
-an error message like this: ::
+但是当有错误发生时，它会产生这样的输出: ::
 
     $ cronic ls asdf
     Cronic Error Report
@@ -135,16 +124,14 @@ an error message like this: ::
 
     None
 
-If you have configured your crontab, now an email will send to your email address.
+如果你已经配置好了你的crontab的话，这个时候就会发送一封这样的邮件到你的邮箱了。
 
-You can also modify config to send mail through smtp instead of using crontab 
-and this is the more recommended.
+或者你也可以修改"/etc/pycronic.conf"来配置smtp服务来通过它来发送错误邮件，我们也更推荐这么干。
 
-Rock crontab
-============
+配置上crontab
+=============
 
-Now config your crontab, using pycronic to wrap your scripts: ::
-
+现在在crontab里使用它吧: ::
 
     $ crontab -e
     # If you have not config your pycronic.conf's smtp config, you can still
