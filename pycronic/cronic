@@ -9,6 +9,7 @@ import sys
 import socket
 import datetime
 import tempfile
+import traceback
 import subprocess
 import smtplib
 from email.mime.text import MIMEText
@@ -81,7 +82,12 @@ def main():
 
     stdout = tempfile.TemporaryFile()
     stderr = tempfile.TemporaryFile()
-    ret_code = subprocess.call(command, stdout=stdout, stderr=stderr)
+    # Catch the OSError
+    try:
+        ret_code = subprocess.call(command, stdout=stdout, stderr=stderr)
+    except OSError, e:
+        ret_code = 99
+        stderr.write(traceback.format_exc())
     stdout.seek(0)
     stderr.seek(0)
     stdout_content = stdout.read().strip()

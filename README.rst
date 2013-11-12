@@ -12,7 +12,7 @@ Use pip install from github: ::
 
     # Install from pypi
     sudo pip install pycronic
-    # Or install github
+    # Or install from github
     sudo pip install -e git+https://github.com/piglei/pycronic/#egg=pycronic
 
 Configuration

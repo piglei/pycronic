@@ -6,10 +6,11 @@ def readme():
         return f.read()
 
 setup(name='pycronic',
-      version='0.0.1',
+      version='0.0.2',
       description='A crontab script wrapper written by python',
       long_description=readme(),
       author='piglei',
+      url='https://github.com/piglei/pycronic/',
       keywords='crontab cronic',
       author_email='piglei2007@gmail.com',
       license='GPL',
