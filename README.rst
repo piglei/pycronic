@@ -2,7 +2,7 @@
 pycronic
 ========
 
-`中文文档`_
+`Chinese Version`_
 
 This project is inspired by `cronic`_ and privided some extra useful functions
 such as sending email error report by SMTP and store logs of crontab scripts.
@@ -159,5 +159,5 @@ Now config your crontab, using pycronic to wrap your scripts: ::
 Enjoy!
 
 .. _cronic: http://habilis.net/cronic/
-.. _中文文档: https://github.com/piglei/pycronic/blob/master/README_zh.rst
+.. _Chinese Version: https://github.com/piglei/pycronic/blob/master/README_zh.rst
 
