@@ -10,7 +10,7 @@ Installation
 
 Use pip install from github: ::
 
-    sudo pip install https://github.com/piglei/pycronic.git
+    sudo pip install -e git+https://github.com/piglei/pycronic/#egg=pycronic
 
 Configuration
 =============
