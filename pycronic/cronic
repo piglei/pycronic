@@ -1,0 +1,120 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Inspired by http://habilis.net/cronic/
+"""
+import os
+import re
+import sys
+import socket
+import datetime
+import tempfile
+import subprocess
+import smtplib
+from email.mime.text import MIMEText
+from configobj import ConfigObj
+socket.setdefaulttimeout(60)
+
+from pycronic.constants import default_config_file, error_report_tmpl, default_mail_title
+
+config_path = '/etc/pycronic.conf'
+
+
+class SMTPMailSender(object):
+    """
+    Simple helper sending emails via SMTP
+    """
+    def __init__(self, config):
+        self.config = config
+
+    def send(self, recievers, subject, content):
+        """
+        Send email via SMTP
+        """
+        s = smtplib.SMTP(self.config['host'], int(self.config['port']))
+        s.login(self.config['username'], self.config['password'])
+
+        from_address = self.config.get('from')
+        for reciever in recievers:
+            msgRoot = MIMEText(content, 'plain', 'UTF-8')
+            msgRoot['Subject'] = subject
+            msgRoot['From'] = from_address
+            msgRoot['To'] = reciever
+            s.sendmail(from_address, reciever, msgRoot.as_string())
+        s.close()
+
+
+def main():
+    command = sys.argv[1:]
+    command_str = ' '.join(command)
+    if not command:
+        print 'Usage: cronic YOUR_COMMAND'
+        sys.exit(1)
+    # Init a config file
+    if len(command) == 1 and command[0] == 'init':
+        try:
+            fp = open(config_path, 'w')
+        except Exception, e:
+            print 'Error occured when creating default config file:'
+            print e
+            return
+        fp.write(default_config_file)
+        fp.close()
+        return
+
+    if not os.path.exists(config_path):
+        print ('Config file "/etc/pycronic.conf" does not exist!\n'
+               'Run "cronic init" to create a default one."')
+        sys.exit(1)
+    else:
+        config = ConfigObj(infile=config_path, interpolation=False)
+
+    log_path = config.get('log_path')
+    if log_path:
+        if not os.path.exists(log_path):
+            os.makedirs(log_path)
+        log_filename = os.path.join(log_path, '%s.log' %
+                os.path.basename(command[0]).split('.', 1)[0])
+    else:
+        log_filename = None
+
+
+    stdout = tempfile.TemporaryFile()
+    stderr = tempfile.TemporaryFile()
+    ret_code = subprocess.call(command, stdout=stdout, stderr=stderr)
+    stdout.seek(0)
+    stderr.seek(0)
+    stdout_content = stdout.read().strip()
+    stderr_content = stderr.read().strip()
+    # Write result to log file
+    if log_filename:
+        with open(log_filename, 'a') as fp:
+            fp.write('Running %s at %s\n' % (command_str, datetime.datetime.now()))
+            fp.write('STDOUT:\n%s\n' % stdout_content)
+            fp.write('STDERR:\n%s\n' % stderr_content)
+
+    # Check return code and stderr output
+    # Also check if "ERROR" are in the stdout 
+    if ret_code != 0 or stderr_content or re.search(r'\bERROR\b', stdout_content):
+        content = error_report_tmpl % {
+               'command': command_str, 'ret_code': ret_code,
+               'stderr_content': stderr_content or 'None',
+               'stdout_content': stdout_content or 'None',
+               'now': datetime.datetime.now()}
+        print content
+        # Send an error email
+        if 'send_alert_email' not in config or not config.as_bool('send_alert_email'):
+            return
+
+        title = config.get('mail_title', default_mail_title) % {
+                'command': command_str, 'host': socket.gethostname()}
+        receivers = config.get('receivers', '')
+        receivers = [receivers] if receivers and isinstance(receivers, basestring) else receivers
+        smtp_config = config.get('email_config_smtp')
+        if receivers:
+            SMTPMailSender(smtp_config).send(receivers, title, content)
+
+if __name__ == '__main__':
+    main()
+
+
