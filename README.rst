@@ -102,7 +102,7 @@ file should looked like this: ::
     # username = username
     # host = smtp.sample.com
     # password = password
-    # FROM = Cronic <pycronic@sample.com>
+    # from = Cronic <pycronic@sample.com>
     # port = 587
 
 How to use

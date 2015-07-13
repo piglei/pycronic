@@ -20,7 +20,7 @@ mail_title = %s
 # username = username
 # host = smtp.sample.com
 # password = password
-# FROM = Cronic <pycronic@sample.com>
+# from = Cronic <pycronic@sample.com>
 # port = 587
 ''' % (default_mail_title)
 
