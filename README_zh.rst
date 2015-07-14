@@ -90,7 +90,7 @@ pycronic
     # username = username
     # host = smtp.sample.com
     # password = password
-    # FROM = Cronic <pycronic@sample.com>
+    # from = Cronic <pycronic@sample.com>
     # port = 587
 
 如何使用
