@@ -7,12 +7,14 @@ import os
 import re
 import sys
 import socket
+import time
 import datetime
 import tempfile
 import traceback
 import subprocess
-import smtplib
-from email.mime.text import MIMEText
+#import smtplib
+#from email.mime.text import MIMEText
+from sender import Mail, Message
 from configobj import ConfigObj
 socket.setdefaulttimeout(60)
 
@@ -28,21 +30,42 @@ class SMTPMailSender(object):
     def __init__(self, config):
         self.config = config
 
-    def send(self, recievers, subject, content):
+    def send(self, receivers, subject, content):
         """
         Send email via SMTP
         """
-        s = smtplib.SMTP(self.config['host'], int(self.config['port']))
-        s.login(self.config['username'], self.config['password'])
+        use_tls = False
+        use_ssl = False
+        smtp_debug_level = None
+        if 'use_tls' in self.config:
+            use_tls = self.config['use_tls']
+        if 'use_ssl' in self.config:
+            use_ssl = self.config['use_ssl']
+        if 'smtp_debug_level' in self.config:
+            smtp_debug_level = self.config['smtp_debug_level']
 
-        from_address = self.config.get('from')
-        for reciever in recievers:
-            msgRoot = MIMEText(content, 'plain', 'UTF-8')
-            msgRoot['Subject'] = subject
-            msgRoot['From'] = from_address
-            msgRoot['To'] = reciever
-            s.sendmail(from_address, reciever, msgRoot.as_string())
-        s.close()
+        s = Mail(self.config['host'], port=int(self.config['port']),\
+            username=self.config['username'], \
+            password=self.config['password'], \
+            use_tls=use_tls, use_ssl=use_ssl, debug_level=smtp_debug_level
+        )
+
+        #s = smtplib.SMTP(self.config['host'], int(self.config['port']))
+        #s.login(self.config['username'], self.config['password'])
+        
+        s.fromadd = self.config.get('from')
+        msg = Message(subject)
+        msg.fromaddr = self.config.get('from')
+        msg.body = content
+        msg.date = time.time()
+        for receiver in receivers:
+            msg.to = receiver
+            #msgRoot = MIMEText(content, 'plain', 'UTF-8')
+            #msgRoot['Subject'] = subject
+            #msgRoot['From'] = from_address
+            #msgRoot['To'] = reciever
+            #s.sendmail(from_address, reciever, msgRoot.as_string())
+            s.send(msg)
 
 
 def main():
