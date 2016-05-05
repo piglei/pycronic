@@ -4,15 +4,15 @@ pycronic
 
 `Chinese Version`_
 
-This project is inspired by `cronic`_ and privided some extra useful functions
-such as sending email error report by SMTP and store logs of crontab scripts.
+This project is inspired by `cronic`_ and includes some extra useful functions
+such as sending email error report through SMTP and store logs of crontab scripts.
 
 Why pycronic?
 =============
 
 Crontab has the ability to send mail notification when any output was generated
-executing your script as we know. And it will send bunch of emails to you 
-every day if your has a lof of scripts, what if we only want to get the mail 
+executing your script, as we know. It will send a bunch of emails to you 
+every day if you have a lof of scripts. What if we only want to get the mail 
 when something goes wrong?
 
 As a result, You may config your crontab like this: ::
@@ -25,12 +25,12 @@ As a result, You may config your crontab like this: ::
     # be notified if your script fails.
     * * * * * some_work > /dev/null 2>&1
 
-Using pycronic to make things simpler: ::
+Using pycronic make things simplier: ::
 
     cronic="/usr/local/bin/cronic"                                                                       
     * * * * * &cronic some_work
 
-All you need is prepend cronic to your script.
+All you need is to prepend cronic to your script execution command.
 **cronic** command will check the return code and the error output for you, if something
 wents wrong, you will get an email notification through crontab's default mailing system
 or your customized STMP server. ::
@@ -58,7 +58,7 @@ or your customized STMP server. ::
 
     Starting backup...
 
-And cronic will stores all your scripts output to a directory(/tmp/pycronic by default).
+And cronic will store all your scripts output to a directory (/tmp/pycronic by default).
 
 Installation
 ============
@@ -67,8 +67,11 @@ Using pip: ::
 
     # Install from pypi
     sudo pip install pycronic
+    # Latest version from git
+    sudo pip install https://github.com/piglei/pycronic/archive/master.zip
     # Or install from github
     sudo pip install -e git+https://github.com/piglei/pycronic/#egg=pycronic
+    
 
 Configuration
 =============
@@ -82,8 +85,8 @@ After the installation, run "cronic" in your command line to verify: ::
     Config file "/etc/pycronic.conf" does not exist!
     Run "cronic init" to create a default one."
 
-Then run "sudo cronic init" to creat a default config file under /etc, the default config
-file should looked like this: ::
+Then run "sudo cronic init" to create a default config file under /etc, the default config
+file should look like this: ::
 
     # Log path for pycronic, pycronic will store all logs to this directory
     log_path = /tmp/pycronic
@@ -108,13 +111,13 @@ file should looked like this: ::
 How to use
 ==========
 
-cronic will be silent if no error has occured when running a script: ::
+cronic will be silent if no error occured when running a script: ::
 
     piglei@macbook-pro:etc$ cronic ls
     piglei@macbook-pro:etc$ cat /tmp/pycronic/ls.log 
     [The script result will be stored in the log file]
 
-But if an error has occured(cronic will check the standard error output), it will print
+But if an error has occured (cronic will check the standard error output), it will print
 an error message like this: ::
 
     $ cronic ls asdf
@@ -137,10 +140,10 @@ an error message like this: ::
 
     None
 
-If you have configured your crontab, now an email will send to your email address.
+If you have configured your crontab an email will send to your email address.
 
-You can also modify config to send mail through smtp instead of using crontab 
-and this is the more recommended.
+You can also modify config to send mail through SMTP instead of using crontab 
+which is highly more recommended.
 
 Rock crontab
 ============
