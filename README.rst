@@ -72,6 +72,8 @@ Using pip: ::
     # Or install from github
     sudo pip install -e git+https://github.com/piglei/pycronic/#egg=pycronic
     
+Note: pycronic is now python3 compatible, you can install using ``pip3 install ...``
+    
 
 Configuration
 =============
