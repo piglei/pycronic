@@ -62,22 +62,22 @@ def main():
     command = sys.argv[1:]
     command_str = ' '.join(command)
     if not command:
-        print 'Usage: cronic YOUR_COMMAND'
+        print('Usage: cronic YOUR_COMMAND')
         sys.exit(1)
     # Init a config file
     if len(command) == 1 and command[0] == 'init':
+        fp = False
         try:
             fp = open(config_path, 'w')
-        except Exception, e:
-            print 'Error occured when creating default config file:'
-            print e
-            return
-        fp.write(default_config_file)
-        fp.close()
-        return
+        except IOError:
+            print('Error occured when creating default config file:\n')
+        if fp:
+           fp.write(default_config_file)
+           fp.close()
+        return True
 
     if not os.path.exists(config_path):
-        print ('Config file "/etc/pycronic.conf" does not exist!\n'
+        print('Config file "/etc/pycronic.conf" does not exist!\n'
                'Run "cronic init" to create a default one."')
         sys.exit(1)
     else:
@@ -98,7 +98,7 @@ def main():
     # Catch the OSError
     try:
         ret_code = subprocess.call(command, stdout=stdout, stderr=stderr)
-    except OSError, e:
+    except OSError as e:
         ret_code = 99
         stderr.write(traceback.format_exc())
     stdout.seek(0)
@@ -113,14 +113,14 @@ def main():
             fp.write('STDERR:\n%s\n' % stderr_content)
 
     # Check return code and stderr output
-    # Also check if "ERROR" are in the stdout 
-    if ret_code != 0 or stderr_content or re.search(r'\bERROR\b', stdout_content):
+    # Also check if "ERROR" are in the stdout
+    if ret_code != 0 or stderr_content or re.search(r'\bERROR\b', stdout_content.decode()):
         content = error_report_tmpl % {
                'command': command_str, 'ret_code': ret_code,
                'stderr_content': stderr_content or 'None',
                'stdout_content': stdout_content or 'None',
                'now': datetime.datetime.now()}
-        print content
+        print(content)
         # Send an error email
         if 'send_alert_email' not in config or not config.as_bool('send_alert_email'):
             return
@@ -128,7 +128,7 @@ def main():
         title = config.get('mail_title', default_mail_title) % {
                 'command': command_str, 'host': socket.gethostname()}
         receivers = config.get('receivers', '')
-        receivers = [receivers] if receivers and isinstance(receivers, basestring) else receivers
+        receivers = [receivers] if receivers and isinstance(receivers, str) else receivers
         smtp_config = config.get('email_config_smtp')
         if receivers:
             SMTPMailSender(smtp_config).send(receivers, title, content)
