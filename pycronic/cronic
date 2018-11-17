@@ -3,6 +3,8 @@
 """
 Inspired by http://habilis.net/cronic/
 """
+from __future__ import print_function
+
 import os
 import re
 import sys
@@ -14,6 +16,7 @@ import traceback
 import subprocess
 from sender import Mail, Message
 from configobj import ConfigObj
+
 socket.setdefaulttimeout(60)
 
 from pycronic.constants import default_config_file, error_report_tmpl, default_mail_title
@@ -69,9 +72,10 @@ def main():
         fp = False
         try:
             fp = open(config_path, 'w')
-        except IOError:
-            print('Error occured when creating default config file:\n')
-        if fp:
+        except IOError as e:
+            print('Error occured when creating default config file: {}'.format(e))
+            return False
+        else:
            fp.write(default_config_file)
            fp.close()
         return True
