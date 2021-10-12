@@ -104,7 +104,7 @@ def main():
         ret_code = subprocess.call(command, stdout=stdout, stderr=stderr)
     except OSError as e:
         ret_code = 99
-        stderr.write(traceback.format_exc())
+        stderr.write(traceback.format_exc().encode('utf-8'))
     stdout.seek(0)
     stderr.seek(0)
     stdout_content = stdout.read().strip()
